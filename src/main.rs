@@ -1,7 +1,8 @@
 mod s1_lifetime_annotations;
 mod s2_declarative_macros;
+mod s3_iterators;
 
-const TEST_CASE: i32 = 2;
+const TEST_CASE: i32 = 3;
 
 fn main() {
     match TEST_CASE {
@@ -11,6 +12,7 @@ fn main() {
         }
 
         2 => s2_declarative_macros::declarative_macros::tests(),
+        3 => s3_iterators::iterators::tests(),
 
         _ => println!("Invalid test case"),
     }
