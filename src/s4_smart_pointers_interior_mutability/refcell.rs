@@ -31,12 +31,12 @@ impl<T> MyRefCell<T> {
                 Some(MyRef { refcell: self })
             }
 
-            RefState::Shared(n) => unsafe {
+            RefState::Shared(n) => {
                 // SAFETY: no exclusive references have been given out, since state would be
                 // exclusive
                 self.state.set(RefState::Shared(n + 1));
                 Some(MyRef { refcell: self })
-            },
+            }
 
             RefState::Exclusive => None,
         }

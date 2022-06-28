@@ -16,7 +16,7 @@ fn main() {
 
         3 => s3_iterators::iterators::tests(),
 
-        4 => {
+        7 => {
             s4_smart_pointers_interior_mutability::cell::tests();
             s4_smart_pointers_interior_mutability::refcell::tests();
             s4_smart_pointers_interior_mutability::rc::tests();
