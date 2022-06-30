@@ -2,8 +2,9 @@ mod s1_lifetime_annotations;
 mod s2_declarative_macros;
 mod s3_iterators;
 mod s4_smart_pointers_interior_mutability;
+mod s5_channels;
 
-const TEST_CASE: i32 = 4;
+const TEST_CASE: i32 = 5;
 
 fn main() {
     match TEST_CASE {
@@ -16,11 +17,13 @@ fn main() {
 
         3 => s3_iterators::iterators::tests(),
 
-        7 => {
+        4 => {
             s4_smart_pointers_interior_mutability::cell::tests();
             s4_smart_pointers_interior_mutability::refcell::tests();
             s4_smart_pointers_interior_mutability::rc::tests();
         }
+
+        5 => s5_channels::channels::tests(),
 
         _ => println!("Invalid test case"),
     }
