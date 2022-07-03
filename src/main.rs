@@ -28,7 +28,10 @@ fn main() {
 
         5 => s5_channels::channels::tests(),
 
-        6 => s6_sorting_algos::orst::tests(),
+        6 => {
+            s6_sorting_algos::orst::tests();
+            s6_sorting_algos::benches::benchmarks::run_benchmarks();
+        }
 
         _ => println!("Invalid test case"),
     }

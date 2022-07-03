@@ -2,8 +2,8 @@ use super::orst::Sorter;
 
 pub struct InsertionSort;
 
-impl Sorter for InsertionSort {
-    fn sort<T>(slice: &mut [T])
+impl<T> Sorter<T> for InsertionSort {
+    fn sort(&self, slice: &mut [T])
     where
         T: Ord,
     {
@@ -26,7 +26,7 @@ fn insertion_sort_works() {
     use super::orst::Sorter;
 
     let mut things = vec![4, 2, 3, 1];
-    InsertionSort::sort(&mut things);
+    InsertionSort.sort(&mut things);
 
     assert_eq!(things, &[1, 2, 3, 4]);
 }

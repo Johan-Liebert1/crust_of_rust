@@ -2,11 +2,15 @@ use super::orst::Sorter;
 
 pub struct BubbleSort;
 
-impl Sorter for BubbleSort {
-    fn sort<T>(slice: &mut [T])
+impl<T> Sorter<T> for BubbleSort {
+    fn sort(&self, slice: &mut [T])
     where
         T: Ord,
     {
+        if slice.len() == 0 {
+            return;
+        }
+
         let mut swapped = true;
 
         while swapped {
@@ -25,7 +29,7 @@ impl Sorter for BubbleSort {
 #[test]
 fn bubble_sort_works() {
     let mut things = vec![4, 2, 3, 1];
-    super::orst::sort::<_, BubbleSort>(&mut things);
+    BubbleSort.sort(&mut things);
 
     assert_eq!(things, &[1, 2, 3, 4]);
 }
