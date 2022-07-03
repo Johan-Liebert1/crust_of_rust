@@ -1,10 +1,13 @@
+#![allow(unused_variables, unused_mut, dead_code, unused_assignments)]
+
 mod s1_lifetime_annotations;
 mod s2_declarative_macros;
 mod s3_iterators;
 mod s4_smart_pointers_interior_mutability;
 mod s5_channels;
+mod s6_sorting_algos;
 
-const TEST_CASE: i32 = 5;
+const TEST_CASE: i32 = 6;
 
 fn main() {
     match TEST_CASE {
@@ -24,6 +27,8 @@ fn main() {
         }
 
         5 => s5_channels::channels::tests(),
+
+        6 => s6_sorting_algos::orst::tests(),
 
         _ => println!("Invalid test case"),
     }

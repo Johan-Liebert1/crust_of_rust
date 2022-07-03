@@ -1,5 +1,17 @@
 #![allow(unused_variables, dead_code, unused_mut)]
 
+// Channel Flavours:
+//
+//  - Synchronous channels: Channel where send can block. Limited capacity
+//
+//  - Asynchronous channels: Channel where send cannot block. Unbounded
+//
+//  - Randezvous channels: Synchronous with capacity = 0. Won't let you send things, used for thread
+//  synchronization
+//
+//  - Oneshot channels: Channles you only send at once. Any capacity, in practice only 1 call to
+//  send()
+
 use std::collections::VecDeque;
 use std::sync::{Arc, Condvar, Mutex}; // VecDeque = kinda like a ring buffer
                                       // Arc = Atomically reference counted type
