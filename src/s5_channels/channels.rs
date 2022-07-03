@@ -8,6 +8,24 @@ pub struct Sender<T> {
     shared: Arc<Shared<T>>,
 }
 
+pub struct Receiver<T> {
+    shared: Arc<Shared<T>>,
+    // since we have only one receiver, we don't need to take the lock on every receive
+    buffer: VecDeque<T>,
+}
+
+struct Inner<T> {
+    // things in the channel
+    queue: VecDeque<T>,
+    senders: usize,
+}
+
+struct Shared<T> {
+    // things in the channel
+    inner: Mutex<Inner<T>>,
+    available: Condvar,
+}
+
 impl<T> Clone for Sender<T> {
     fn clone(&self) -> Self {
         let mut inner = self.shared.inner.lock().unwrap();
@@ -41,25 +59,42 @@ impl<T> Drop for Sender<T> {
 impl<T> Sender<T> {
     pub fn send(&mut self, t: T) {
         let mut inner = self.shared.inner.lock().unwrap();
+        // it might be that the VecDeque's size increases which means that send would take longer
+        // and not necessarily that send will block
         inner.queue.push_back(t);
-        drop(inner);
+        drop(inner); // drop the lock
 
         // notify any waiting receiver when it sends
         self.shared.available.notify_one();
     }
 }
 
-pub struct Receiver<T> {
-    shared: Arc<Shared<T>>,
-}
-
 impl<T> Receiver<T> {
     pub fn receive(&mut self) -> Option<T> {
+        if let Some(t) = self.buffer.pop_front() {
+            // here we have something in the receiver's buffer that we copied from the VecDeque
+            // during the last receive. Here we don't need to take the lock as we alrady have
+            // soemthing that's not yet "received"
+            return Some(t);
+        }
+
         let mut inner = self.shared.inner.lock().unwrap();
 
         loop {
             match inner.queue.pop_front() {
-                Some(t) => return Some(t),
+                Some(t) => {
+                    if !inner.queue.is_empty() {
+                        // copy the contents of the queue into receiver's buffer so that the next
+                        // size(self.buffer) receives won't take the lock
+                        // we swap the empty buffer with the queue that has items to receive
+                        //
+                        // NOTE: The buffer will be empty here as we will always pop from the
+                        // buffer if it's not empty
+                        std::mem::swap(&mut self.buffer, &mut inner.queue);
+                    }
+
+                    return Some(t);
+                }
 
                 // if the sender count is 0, then just
                 // return as the channel is empty forever
@@ -74,16 +109,13 @@ impl<T> Receiver<T> {
     }
 }
 
-struct Inner<T> {
-    // things in the channel
-    queue: VecDeque<T>,
-    senders: usize,
-}
+// impementing Iterator for receiver which would be similar to Go's for item := channel {}
+impl<T> Iterator for Receiver<T> {
+    type Item = T;
 
-struct Shared<T> {
-    // things in the channel
-    inner: Mutex<Inner<T>>,
-    available: Condvar,
+    fn next(&mut self) -> Option<Self::Item> {
+        self.receive()
+    }
 }
 
 pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
@@ -105,6 +137,7 @@ pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
         },
         Receiver {
             shared: shared.clone(),
+            buffer: VecDeque::default(),
         },
     )
 }
@@ -124,7 +157,7 @@ pub fn tests() {
     assert_eq!(rx.receive(), None);
 
     // closed rx
-    let (mut tx, mut rx) = channel::<()>();
+    let (mut tx, mut rx) = channel();
     drop(rx);
     tx.send(42); // we should tell that channel has been closed as there are no receivers
 }
