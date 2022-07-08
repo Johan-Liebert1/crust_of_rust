@@ -1,4 +1,5 @@
 #![allow(unused_variables, unused_mut, dead_code, unused_assignments)]
+#![feature(dropck_eyepatch)]
 
 mod s1_lifetime_annotations;
 mod s2_declarative_macros;
@@ -6,8 +7,9 @@ mod s3_iterators;
 mod s4_smart_pointers_interior_mutability;
 mod s5_channels;
 mod s6_sorting_algos;
+mod s7_drop_check;
 
-const TEST_CASE: i32 = 6;
+const TEST_CASE: i32 = 7;
 
 fn main() {
     match TEST_CASE {
@@ -32,6 +34,8 @@ fn main() {
             s6_sorting_algos::orst::tests();
             s6_sorting_algos::benches::benchmarks::run_benchmarks();
         }
+
+        7 => s7_drop_check::drop_check::boks_main(),
 
         _ => println!("Invalid test case"),
     }
