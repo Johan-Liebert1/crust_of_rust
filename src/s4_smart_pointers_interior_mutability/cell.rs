@@ -26,6 +26,7 @@ impl<T> MyCell<T> {
     /// get always returns a copy and never a reference
     /// Reasoning
     ///
+    /// ```
     /// let x = Cell::new(vec![42]);
     /// let first = &x.get()[0];
     ///
@@ -33,8 +34,8 @@ impl<T> MyCell<T> {
     /// x.set(vec![]);
     ///
     /// println!("{}", first); // wrong! as the reference to first now just points to some random
-    ///
     /// memory
+    /// ```
     pub fn get(&self) -> T
     where
         T: Copy,

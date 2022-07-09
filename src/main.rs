@@ -8,8 +8,9 @@ mod s4_smart_pointers_interior_mutability;
 mod s5_channels;
 mod s6_sorting_algos;
 mod s7_drop_check;
+mod s8_atomics_and_memory;
 
-const TEST_CASE: i32 = 7;
+const TEST_CASE: i32 = 8;
 
 fn main() {
     match TEST_CASE {
@@ -32,10 +33,12 @@ fn main() {
 
         6 => {
             s6_sorting_algos::orst::tests();
-            s6_sorting_algos::benches::benchmarks::run_benchmarks();
+            // s6_sorting_algos::benches::benchmarks::run_benchmarks();
         }
 
         7 => s7_drop_check::drop_check::boks_main(),
+
+        8 => s8_atomics_and_memory::atomics_and_memory::tests(),
 
         _ => println!("Invalid test case"),
     }
