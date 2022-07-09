@@ -1,4 +1,10 @@
-#![allow(unused_variables, unused_mut, dead_code, unused_assignments)]
+#![allow(
+    unused_variables,
+    unused_mut,
+    dead_code,
+    unused_assignments,
+    unused_doc_comments
+)]
 #![feature(dropck_eyepatch)]
 
 mod s1_lifetime_annotations;
@@ -9,8 +15,9 @@ mod s5_channels;
 mod s6_sorting_algos;
 mod s7_drop_check;
 mod s8_atomics_and_memory;
+mod s9_dispatch_and_fat_pointers;
 
-const TEST_CASE: i32 = 8;
+const TEST_CASE: i32 = 9;
 
 fn main() {
     match TEST_CASE {
@@ -39,6 +46,8 @@ fn main() {
         7 => s7_drop_check::drop_check::boks_main(),
 
         8 => s8_atomics_and_memory::atomics_and_memory::tests(),
+
+        9 => s9_dispatch_and_fat_pointers::dispatch_and_fat_pointers::tests(),
 
         _ => println!("Invalid test case"),
     }
