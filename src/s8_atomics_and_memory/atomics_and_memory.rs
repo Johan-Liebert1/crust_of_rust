@@ -128,6 +128,7 @@ pub mod tests {
             // this line might execute before the previous line due to CPU / compiler optimizing things
             // which is allowed as the following line does not depend on anything that the previous
             // line does as the following line does not use r2 and neither x
+            //
             // NOTE: Odering::Relaxed allows this to happen
             y.store(42, Ordering::Relaxed);
             r2
@@ -148,11 +149,11 @@ pub mod tests {
         let y: &'static _ = Box::leak(Box::new(AtomicBool::new(false)));
         let z: &'static _ = Box::leak(Box::new(AtomicUsize::new(0)));
 
-        spawn(move || {
+        let _tx = spawn(move || {
             x.store(true, Ordering::Release);
         });
 
-        spawn(move || {
+        let _ty = spawn(move || {
             y.store(true, Ordering::Release);
         });
 
@@ -177,7 +178,48 @@ pub mod tests {
 
         let z = z.load(Ordering::SeqCst);
 
+        eprintln!("z = {}", z);
+
         // What are the possible values for z?
+        //
+        // - Is 2 possible?
+        // Yes if they run in this order, tx, ty, t1, t2
+        //
+        // - Is 1 possible?
+        // Yes: tx, t1, ty, t2
+        //
+        // - Is 0 possible?
+        //
+        // Restrictions: we know that t1 must run after tx as t1 has a waiting loop on x
+        // we know that t2 must run after ty as t2 has a waiting loop on y
+        //
+        // ty t2 tx t1 -> t1 will increment z
+        //
+        // ty tx (ty <ty can also go here>) t2 t1 -> t1 & t2 will increment z
+        //
+        // tx t1 ty t2 -> t2 will increment z
+        //
+        // Seems impossible ...
+        //
+        // Modification Order for x = false (then) true
+        // Modification Order for y = false (then) true
+        //
+        // t1 is allowed to see either of the values for y, i.e. it's allowed to see true and false
+        // this is because in an Acquire / Release setup, if you observe a value from Acquire,
+        // you will see all the operations before the corresponding release store
+        //
+        // corresponding release for tx's Acquire is in tx
+        //
+        // t1 is bound to get true from the Modification order of x, but it can see either true /
+        // false from the Modification order of y. This is because there are no Modifications of y
+        // before the corresponding Release (there could be if t2 runs but otherwise there are none)
+        // so we can get true if t2 runs else false
+        //
+        // Same is true for t2, t2 is see true for y but is
+        // allowed to see either true / false from the Modification order of x
+        //
+        // NOTE: If we make all orderings SeqCst then 0 is no longer possible as SeqCst will make
+        // sure that every thread will see everything happen in the same order
     }
 }
 
